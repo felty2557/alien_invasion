@@ -4,6 +4,7 @@ from rocket import Rocket
 import pygame # Модуль pygame содержит функциональность, необходимую для создания игры
 from bullet import Bullet
 import time
+from alien import Alien
 
 class AlienInvasion:
     """Класс для управления ресурсами и поведением игры."""
@@ -18,6 +19,8 @@ class AlienInvasion:
         pygame.display.set_caption("Alien Invasion")
         self.rocket = Rocket(self)
         self.bullets = pygame.sprite.Group()
+        self.aliens = pygame.sprite.Group()
+        self.create_flot()
 
     def run_game(self):
         """Запуск основного цикла игры."""
@@ -30,7 +33,7 @@ class AlienInvasion:
                 self.catch_event_move(event)
             self.rocket.move()
             self.bullets.update()
-            self.fire_bullet()
+#            self.fire_bullet()
             self._update_screen()
             
     
@@ -40,6 +43,7 @@ class AlienInvasion:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 self.rocket.fire = True
+                self._fire_bullet()
             if event.key == pygame.K_e:
                 sys.exit()
             if event.key == pygame.K_LEFT:
@@ -75,7 +79,16 @@ class AlienInvasion:
         if self.rocket.fire:
             self.bullets.add(Bullet(self))
             time.sleep(0.2)
-    
+
+    def _fire_bullet(self):
+            """Создание нового снаряда и включение его в группу bullets."""
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
+
+    def create_flot(self):
+        #for i in range(10):
+        alien = Alien(self)
+        self.aliens.add(alien)    
 
 
 
