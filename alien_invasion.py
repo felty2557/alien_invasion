@@ -13,41 +13,56 @@ class AlienInvasion:
     def __init__(self):
         """Инициализирует игру и создает игровые ресурсы."""
         pygame.init()
+
         self.settings = Settings()
-        self.screen = pygame.display.set_mode(
-            (0, 0), pygame.FULLSCREEN
-        )  # создает окно c указанными
-        # размерами - возвращает игровое поле
+        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
-        pygame.display.set_caption("Alien Invasion")
-        self.rocket = Rocket(self)
-        self.bullets = pygame.sprite.Group()
+        self.create_game_objects()
+
+    def create_game_objects(self):
+        # Создание всех объектов игры
         self.aliens = pygame.sprite.Group()
-        self._create_fleet()
+        self.rocket = Rocket(self)
+        self.create_fleet()
 
     def run_game(self):
-        """Запуск основного цикла игры."""
+        """
+            Запуск основного цикла игры.
+            Сюда нужно помещать действия, которые нужно выполнять непрерывно.
+            Например: 
+            1. Обрабатывать все действия пользователя
+            2. Вызывать методы передвижения объектов игры
+        """
         while True:
             # Отслеживание событий клавиатуры и мыши.
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:  # кнопка закрытия игрового поля
-                    sys.exit()
+            for event in pygame.event.get(): # проходим по всем событиям за момент времени
+                # Если клик на кнопке закрытия игрового поля
+                # или если нажали клавишу Q
+                if event.type == pygame.QUIT \
+                or event.type == pygame.KEYDOWN and event.key == pygame.K_q:  
+                    sys.exit() # Закрыть окно с игрой
 
-                self.catch_event_move(event)
-            self.rocket.move()
-            self.bullets.update()
-            self.aliens.update()
-            pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
-            self._update_screen()
+                self.catch_rocket_events(event) # вызов 
 
-    def catch_event_move(self, event):
-        """отслеживания нажатия кнопок движения коробля."""
+            self.update_objects_positions()
+            self.update_screen()
 
+            # удаление всех вражеских кораблей, в которых попала пуля:
+            pygame.sprite.groupcollide(self.rocket.bullets, self.aliens, True, True)
+
+    def update_objects_positions(self):
+        """ Вызываются методы передвижения для всех существующих объектов игры """       
+        self.rocket.update()
+        self.rocket.bullets.update()
+        self.aliens.update()
+
+    def catch_rocket_events(self, event):
+        """ метод отслеживания нажатия кнопок движения и стрельбы коробля."""
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 self.rocket.fire = True
-                self._fire_bullet()
+                self.rocket.fire_bullet()
             if event.key == pygame.K_e:
                 sys.exit()
             if event.key == pygame.K_LEFT:
@@ -70,27 +85,17 @@ class AlienInvasion:
             elif event.key == pygame.K_DOWN:
                 self.rocket.move_down = False
 
-    def _update_screen(self):
-        """обновление экрана."""
+    def update_screen(self):
+        """Обновление экрана"""
         self.screen.fill(self.settings.bg_color)
         # Отображение последнего прорисованного экрана.
-        for bulleta in self.bullets:
-            bulleta.draw_bullet()
+        for bullet in self.rocket.bullets:
+            bullet.draw()
         self.aliens.draw(self.screen)
         self.rocket.blitme()
         pygame.display.flip()
 
-    def fire_bullet(self):
-        if self.rocket.fire:
-            self.bullets.add(Bullet(self))
-            time.sleep(0.2)
-
-    def _fire_bullet(self):
-        """Создание нового снаряда и включение его в группу bullets."""
-        new_bullet = Bullet(self)
-        self.bullets.add(new_bullet)
-
-    def _create_fleet(self):
+    def create_fleet(self):
         """Создает флот пришельцев."""
         # Создание пришельца и вычисление количества пришельцев в ряду
         # Интервал между соседними пришельцами равен ширине пришельца.
@@ -105,9 +110,9 @@ class AlienInvasion:
         # Создание первого ряда пришельцев.
         for row_number in range(number_aliens_y):
             for alien_number in range(number_aliens_x):
-                self._create_alien(alien_number, row_number)
+                self.create_alien(alien_number, row_number)
 
-    def _create_alien(self, alien_number: int, row_number: int):
+    def create_alien(self, alien_number: int, row_number: int):
         """Создание пришельца и размещение его в ряду."""
         alien = Alien(self)
         alien.x = alien.rect.width + 2 * alien.rect.width * alien_number
@@ -119,7 +124,7 @@ class AlienInvasion:
 
 
 if __name__ == "__main__":
-    # Создание экземпляра и запуск игры.н
+    # Создание экземпляра и запуск игры
     ai = AlienInvasion()
     # Процессом игры управляет метод run_game(). Метод содержит непрерывно выпол-
     # няемый цикл while, который содержит цикл событий и код, управляющий об-

@@ -1,4 +1,5 @@
 import pygame
+from bullet import Bullet
 
 class Rocket():
     """Класс для управления кораблем."""
@@ -8,6 +9,7 @@ class Rocket():
         self.settings = ai_game.settings
         self.screen_rect = ai_game.screen.get_rect()
         # Загружает изображение корабля и получает прямоугольник.
+        self.bullets = pygame.sprite.Group()
         image = pygame.image.load('images/rocket.png')
         self.width = 80
         self.height = 120
@@ -25,7 +27,7 @@ class Rocket():
         """Рисует корабль в текущей позиции."""
         self.screen.blit(self.image, self.rect)
 
-    def move(self):
+    def update(self):
         '''движение направо и налево'''
         if self.move_right and self.rect.x < (self.settings.screen_width - self.width):
             self.rect.x += self.settings.rocket_speed
@@ -35,4 +37,8 @@ class Rocket():
             self.rect.y += self.settings.rocket_speed
         if self.move_up and self.rect.y > 0:
             self.rect.y -= self.settings.rocket_speed
-        
+    
+    def fire_bullet(self):
+        """Создание нового снаряда и включение его в группу bullets."""
+        new_bullet = Bullet(self)
+        self.bullets.add(new_bullet)
