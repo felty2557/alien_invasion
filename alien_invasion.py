@@ -1,8 +1,9 @@
 import sys
-from settings import Settings
-from rocket import Rocket
 import pygame
+
 from alien import Alien
+from rocket import Rocket
+from settings import Settings
 
 
 class AlienInvasion:
