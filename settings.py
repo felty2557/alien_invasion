@@ -6,7 +6,13 @@ class Settings():
         self.screen_width = 1200
         self.screen_height = 800
         self.bg_color = (137, 207, 240)
+
+        # Параметры рокеты
+        self.rocket_width = 80
+        self.rocket_height = 120
         self.rocket_speed = 1
+
+        # Параметры пули
         self.bullet_width = 10
         self.bullet_height = 30
         self.bullet_speed = 1
