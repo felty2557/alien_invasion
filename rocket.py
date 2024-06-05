@@ -70,3 +70,8 @@ class Rocket:
                 self.move_up = event.type == pygame.KEYDOWN
             elif event.key == pygame.K_DOWN:
                 self.move_down = event.type == pygame.KEYDOWN
+                
+    def center_ship(self):
+        """Размещает корабль в центре нижней стороны."""
+        self.rect.midbottom = self.screen_rect.midbottom
+        self.x = float(self.rect.x)
