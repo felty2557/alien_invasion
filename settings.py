@@ -21,7 +21,7 @@ class Settings():
         # Параметры пришельцев
         self.alien_width = 80
         self.alien_height = 90
-        self.alien_speed_x = 0.5 # скорость по вертикали
+        self.alien_speed_x = 0.1 # скорость по вертикали
         self.alien_speed_y = 0.05 # скорость по горизонтали
         self.alien_max_steps_x = 100 # амплитуда перемещения пришельца по горизонтали(право-влево)
 

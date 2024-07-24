@@ -7,7 +7,7 @@ from settings import Settings
 from game_stats import GameStats
 from time import sleep
 from button import Button
-
+from score import ScoreBoard
 
 class AlienInvasion:
     """Класс для управления ресурсами и поведением игры."""
@@ -21,6 +21,7 @@ class AlienInvasion:
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
+        self.scoreboard = ScoreBoard(self)
         self.create_game_objects()
 
     def create_game_objects(self):
@@ -61,14 +62,31 @@ class AlienInvasion:
             self.update_screen()
 
             # удаление всех вражеских кораблей, в которых попала пуля:
-            pygame.sprite.groupcollide(self.rocket.bullets, self.aliens, True, True)
+            collisions = pygame.sprite.groupcollide(self.rocket.bullets, self.aliens, True, True)
+            if collisions:
+                self.stats.score += 10
+                self.scoreboard.prep_score()
             if pygame.sprite.spritecollideany(self.rocket, self.aliens):
+                self.rocket_hit()
+            self.alien_in_bottom()
+
+            # создает новый флот
+            if len(self.aliens) == 0:
+                Alien.create_fleet(self)
+                self.settings.alien_speed_y += 0.02
+
+    def alien_in_bottom(self):
+        """Забирает жизнь, если пришелец дошел до конца."""
+        for alien in self.aliens:
+            if alien.rect.bottom >= self.screen.get_rect().bottom:
                 self.rocket_hit()
 
     def rocket_hit(self):
-        """Обрабатывает столкновение корабля с пришельцем."""
-        # Уменьшение ships_left.
+        """Уменьшение жизней."""
+        if self.stats.life_count <= 0:
+            return
         self.stats.life_count -= 1
+        self.scoreboard.prep_score()
 
         # Очистка списков пришельцев и снарядов.
         self.aliens.empty()
@@ -96,6 +114,9 @@ class AlienInvasion:
         """При нажатии на кнопку play активирует игру"""
         if self.play_button.rect.collidepoint(mouse_pos):
             self.stats.game_active = True
+            self.stats.reset_stats()
+            self.scoreboard.prep_score()
+            self.settings.alien_speed_y = 0.05
 
     def update_screen(self):
         """Обновление экрана c учетом передвижения всех объектов игры"""
@@ -107,6 +128,7 @@ class AlienInvasion:
         if not self.stats.game_active:
             self.play_button.draw_button()
         self.rocket.blitme()
+        self.scoreboard.show_score()
         pygame.display.flip()
 
 
