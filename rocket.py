@@ -11,6 +11,7 @@ class Rocket:
         self.screen = ai_game.screen
         self.settings = ai_game.settings
         self.screen_rect = ai_game.screen.get_rect()
+        self.bonus = None
 
         # Загружает изображение корабля и получает прямоугольник.
         image = pygame.image.load("images/rocket.png")
@@ -25,6 +26,9 @@ class Rocket:
         self.move_left = False
         self.move_up = False
         self.move_down = False
+
+        # Остальные флаги
+        self.protected = False
 
         # Создается пустой список пуль, который будет заполняться при стрельбе
         self.bullets = pygame.sprite.Group()

@@ -8,6 +8,7 @@ from game_stats import GameStats
 from time import sleep
 from button import Button
 from score import ScoreBoard
+from bonus import Bonus
 
 class AlienInvasion:
     """Класс для управления ресурсами и поведением игры."""
@@ -18,11 +19,12 @@ class AlienInvasion:
 
         self.settings = Settings()
         self.stats = GameStats(self)
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((0, 0))
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
         self.scoreboard = ScoreBoard(self)
         self.create_game_objects()
+        self.active_bonus = None
 
     def create_game_objects(self):
         """ Создание всех объектов игры """
@@ -40,7 +42,16 @@ class AlienInvasion:
                 1. Обрабатывать все действия пользователя
                 2. Вызывать методы передвижения объектов игры
         """
+        iter = 0
         while True:
+            iter += 1
+            if iter == self.settings.iterations_per_bonus:
+                iter = 0
+                self.add_bonus()
+            if self.active_bonus != None and iter == self.settings.iterations_delete_bonus:
+                self.active_bonus.reclaim_bonus()
+                self.active_bonus = None
+
             # Отслеживание событий клавиатуры и мыши.
             for event in pygame.event.get():  # проходим по всем событиям за момент времени
                 # Если клик на кнопке закрытия игрового поля
@@ -69,11 +80,22 @@ class AlienInvasion:
             if pygame.sprite.spritecollideany(self.rocket, self.aliens):
                 self.rocket_hit()
             self.alien_in_bottom()
+            if self.active_bonus and pygame.sprite.spritecollide(self.rocket, [self.active_bonus], False):
+                self.active_bonus.claim_bonus()
+                self.active_bonus = None
+                print("получил бонус")
 
             # создает новый флот
             if len(self.aliens) == 0:
                 Alien.create_fleet(self)
                 self.settings.alien_speed_y += 0.02
+
+    def add_bonus(self) -> None:
+        """Активация бонуса, если игра активирована."""
+        if not self.stats.game_active:
+            return
+        self.active_bonus = Bonus(self)
+        print('Появление бонуса')
 
     def alien_in_bottom(self):
         """Забирает жизнь, если пришелец дошел до конца."""
@@ -83,7 +105,7 @@ class AlienInvasion:
 
     def rocket_hit(self):
         """Уменьшение жизней."""
-        if self.stats.life_count <= 0:
+        if self.stats.life_count <= 0 or self.rocket.protected:
             return
         self.stats.life_count -= 1
         self.scoreboard.prep_score()
@@ -109,6 +131,8 @@ class AlienInvasion:
             self.rocket.update()
             self.rocket.bullets.update()
             self.aliens.update()
+            if self.active_bonus:
+                self.active_bonus.update()
 
     def _check_play_button(self, mouse_pos):
         """При нажатии на кнопку play активирует игру"""
@@ -129,6 +153,8 @@ class AlienInvasion:
             self.play_button.draw_button()
         self.rocket.blitme()
         self.scoreboard.show_score()
+        if self.active_bonus:
+            self.active_bonus.blitme()
         pygame.display.flip()
 
 

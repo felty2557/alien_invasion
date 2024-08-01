@@ -26,3 +26,11 @@ class Settings():
         self.alien_max_steps_x = 100 # амплитуда перемещения пришельца по горизонтали(право-влево)
 
         self.life_count = 3
+
+        # параметры бонусов
+        self.bonus_property = ['speed_low', 'speed_high', 'protection', 'life']
+        self.iterations_per_bonus = 2200
+        self.iterations_delete_bonus = 1100
+        self.bonus_speed_y = 1
+        self.bonus_width = 60
+        self.bonus_height = 70
